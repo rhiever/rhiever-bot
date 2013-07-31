@@ -1,6 +1,6 @@
 #rhiever-bot
 
-rhiever-bot is a Python bot that monitors /r/MUWs and runs the MUW script whenever someone submits a request.
+rhiever-bot is a Python bot that monitors www.reddit.com/r/MUWs and runs the MUW script whenever someone submits a request.
 
 Feel free to add features to the bot and pull the changes here.
 
