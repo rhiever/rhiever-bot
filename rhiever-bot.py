@@ -87,6 +87,10 @@ def fillQueue():
             # a help request
             elif "[help]" in submission.title.lower():
                 pass
+            
+            # mod post
+            elif submission.distinguished != None:
+                pass
                 
             # no valid tag -- remove it
             else:
