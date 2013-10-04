@@ -49,7 +49,7 @@ def fillQueue():
 
     for submission in r.get_subreddit("MUWs").get_new(limit=100):
         if submission.link_flair_text is None:
-            if "[request]" in submission.title.lower():
+            if "[request]" in submission.title.lower() and ("u/" in submission.title.lower() or "r/" in submission.title.lower()):
                 
                 # debugging
                 #if not (submission.author.name == "rhiever"):
