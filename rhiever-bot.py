@@ -23,8 +23,8 @@ lowPrioritySubs = ["pics", "gaming", "games", "worldnews", "videos", "todayilear
 submissionQueue = {}
 
 if len(sys.argv) < 3:
-    sys.stdout.write("\nBot script expects two parameters: your username, bot username, and password\n\n")
-    sys.stdout.write("Usage: python rhiever-bot.py YOUR-USERNAME BOT-USERNAME PASSWORD\n\n")
+    sys.stdout.write("\nBot script expects three parameters: your username, bot username, and bot password\n\n")
+    sys.stdout.write("Usage: python rhiever-bot.py YOUR-USERNAME BOT-USERNAME BOT-PASSWORD\n\n")
     quit()
 
 r = praw.Reddit(user_agent="bot by /u/" + sys.argv[1])
