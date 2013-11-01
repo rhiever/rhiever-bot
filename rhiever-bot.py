@@ -23,8 +23,8 @@ lowPrioritySubs = ["pics", "gaming", "games", "worldnews", "videos", "todayilear
 submissionQueue = {}
 
 if len(sys.argv) < 3:
-    sys.stdout.write("\nBot script expects two parameters: bot username and password\n\n")
-    sys.stdout.write("Usage: python rhiever-bot.py USERNAME PASSWORD\n\n")
+    sys.stdout.write("\nBot script expects two parameters: your username, bot username, and password\n\n")
+    sys.stdout.write("Usage: python rhiever-bot.py YOUR-USERNAME BOT-USERNAME PASSWORD\n\n")
     quit()
 
 r = praw.Reddit(user_agent="bot by /u/" + sys.argv[1])
@@ -36,13 +36,13 @@ def checkQueue():
         if submission.link_flair_text is None and "[request]" in submission.title.lower() and "r/all" not in submission.title.lower():
             requestsWaiting = True
             break
-        
+
     return requestsWaiting
 
 
 def fillQueue():
     """Fills the submission queue with valid requests. Removes invalid submissions."""
-    
+
     # build submission queue to give priority to older requested posts
     global submissionQueue
     submissionQueue = {}
@@ -50,11 +50,11 @@ def fillQueue():
     for submission in r.get_subreddit("MUWs").get_new(limit=100):
         if submission.link_flair_text is None:
             if "[request]" in submission.title.lower() and ("u/" in submission.title.lower() or "r/" in submission.title.lower()):
-                
+
                 # debugging
                 #if not (submission.author.name == "rhiever"):
                 #    continue
-                
+
                 timestamp = submission.created_utc
 
                 # just queue user requests
@@ -75,11 +75,11 @@ def fillQueue():
                         timestamp = time.time()
 
                 submissionQueue[timestamp] = submission
-            
+
             # someone submitting a MUW
             elif "[submission]" in submission.title.lower():
                 pass
-            
+
             # an announcement
             elif "[announcement]" in submission.title.lower():
                 pass
@@ -87,11 +87,11 @@ def fillQueue():
             # a help request
             elif "[help]" in submission.title.lower():
                 pass
-            
+
             # mod post
             elif submission.distinguished != None:
                 pass
-                
+
             # no valid tag -- remove it
             else:
                 submission.add_comment("Your MUW request could not be processed. Please resubmit the request with the following title formats: [Request] /r/SUBREDDIT or [Request] /u/USERNAME")
@@ -100,7 +100,7 @@ def fillQueue():
 
 def runMUWs():
     """Finds the top requests in /r/MUWs and processes them"""
-    
+
     try:
         fillQueue()
     except Exception as e:
@@ -117,26 +117,26 @@ def runMUWs():
             # skip the submission if it's been tagged since being queued
             if submission.link_flair_text is not None:
                 continue
-            
+
             # find out what kind of request it is
             userRequest = False
             if "u/" in submission.title:
                 userRequest = True
-            
+
             # extract the name of the subreddit or user
             title = ""
             splitToken = "r/"
             if userRequest:
                 splitToken = "u/"
-                
+
             title = submission.title.split(splitToken)
             title = title[1].split(" ")
             title = title[0].lower()
             title = title.strip("/")
-            
+
             # make sure it's a valid request
             makeMUW = True
-            
+
             try:
                 if not userRequest:
                     for s in r.get_subreddit(title).get_top_from_all(limit=1):
@@ -144,7 +144,7 @@ def runMUWs():
                 else:
                     for s in r.get_redditor(title).get_overview(limit=1):
                         s.ups
-                        
+
             except KeyboardInterrupt:
                 raise KeyboardInterrupt()
             except:
@@ -153,50 +153,51 @@ def runMUWs():
                 submission.add_comment("Your MUW request could not be processed. Please resubmit the request with the following title formats: [Request] /r/SUBREDDIT or [Request] /u/USERNAME")
                 submission.remove()
                 sys.stderr.write("Submission removed: " + str(submission) + "\n")
-            
+
             if makeMUW:
                 # since it's a valid request, gather data on it
                 submission.set_flair("Running")
-                
+
                 filename = title + ".csv"
                 redditLink = title
-                
+
                 if userRequest:
                     filename = "user-" + filename
                     redditLink = "/u/" + redditLink
                 else:
                     filename = "subreddit-" + filename
                     redditLink = "/r/" + redditLink
-                    
+
                 # check if the request has already been parsed
                 try:
                     with open("cache/" + filename) as f:
                         sys.stderr.write(redditLink + " has already been mined -- using cache\n")
                         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat("cache/" + filename)
-                        
+
                         daysSinceModified = (datetime.now() - datetime.fromtimestamp(mtime)).days
-                        
+
                         if daysSinceModified >= 7:
                             sys.stderr.write("Cached version is out of date -- re-mining\n")
                             raise IOError("Cached version is out of date")
-                        
+
                 except KeyboardInterrupt:
                     raise KeyboardInterrupt()
                 except IOError as e:
-                    os.system("word_freqs -r rhiever " + redditLink)
+                    os.system("word_freqs -r " + sys.argv[1] + " " + redditLink)
                     os.system("mv " + filename + " cache/")
-                    
+
                 # place the output in a comment
                 headerString = ""
-                
+
                 if userRequest:
                     headerString = "Below are the word frequencies for " + redditLink + ". "
                 else:
                     headerString = "Below are the word frequencies from the past month for " + redditLink + ". "
-                
+
                 headerString += "Place these word frequencies into http://www.wordle.net/advanced and click Go. "
                 headerString += "Customize the MUW cloud as you please.\n\n"
                 headerString += "Remember to acknowledge this script and /r/MUWs if you post the MUW to a subreddit.\n\n"
+                headerString += "If you love /r/MUWs, show your appreciation by giving /u/rhiever [reddit gold](http://www.reddit.com/gold/about).\n\n"
                 commentString = headerString
                 allWords = defaultdict(int)
 
@@ -204,31 +205,31 @@ def runMUWs():
                     for line in infile:
                         if line == "":
                             continue
-                        
+
                         text = line.split(":")
                         count = int(text[-1])
                         word = ""
-                        
+
                         for c in text[:-1]:
                             word += c
                         allWords[word] = count
                         #commentString += line + "\n"
-                        
+
                 # if the comment is too long, shorten it to <- 10,000 chars
                 # give priority to most-used words
                 if True: #len(commentString) > 10000:
                     commentString = headerString.encode("UTF-8")
                     charsLeft = 10000 - len(headerString)
-                    
+
                     for word in sorted(allWords, key=allWords.get, reverse=True):
                         line = "    " + word + ":" + str(allWords[word]) + "\n" #\n
                         charsToPlace = len(line)
                         if charsLeft - charsToPlace < 0:
                             break
-                        
+
                         charsLeft -= charsToPlace
                         commentString += line
-                
+
                 try:
                     submission.add_comment(commentString)
                     submission.set_flair("Request Fulfilled")
@@ -236,7 +237,7 @@ def runMUWs():
                     raise KeyboardInterrupt()
                 except:
                     sys.stderr.write("Error commenting on " + str(submission) + "\n")
-        
+
         except KeyboardInterrupt:
             exit()
         except Exception as e:
@@ -263,7 +264,7 @@ def main():
             sys.stderr.write("Unknown error -- restarting\n")
 
         time.sleep(5)
-            
+
         # sleep for a little bit if there is nothing in the queue
         if not checkQueue():
             sys.stderr.write("No requests to handle -- sleeping\n")
