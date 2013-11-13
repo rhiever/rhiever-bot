@@ -197,7 +197,7 @@ def runMUWs():
                 headerString += "Place these word frequencies into http://www.wordle.net/advanced and click Go. "
                 headerString += "Customize the MUW cloud as you please.\n\n"
                 headerString += "Remember to acknowledge this script and /r/MUWs if you post the MUW to a subreddit.\n\n"
-                headerString += "If you love /r/MUWs, show your appreciation by giving /u/rhiever [reddit gold](http://www.reddit.com/gold/about).\n\n"
+                headerString += "If you love /r/MUWs, show your appreciation by gifting /u/rhiever [reddit gold](http://www.reddit.com/gold/about).\n\n"
                 commentString = headerString
                 allWords = defaultdict(int)
 
